@@ -15,7 +15,7 @@ async function generarRespuesta(pregunta) {
             ]
         }, {
             headers: {
-                "Authorization": `Bearer TU_API_KEY`,
+                "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`
                 "Content-Type": "application/json"
             }
         });

@@ -4,7 +4,7 @@ const axios = require("axios");
 const app = express();
 app.use(express.json());
 
-// 🔥 Función inteligente con IA
+// 🔥 IA (Jarvis inteligente)
 async function generarRespuesta(pregunta) {
     try {
         const response = await axios.post(
@@ -14,7 +14,7 @@ async function generarRespuesta(pregunta) {
                 messages: [
                     {
                         role: "system",
-                        content: "Eres Jarvis, un asistente elegante, serio y profesional que responde en español de forma clara y breve."
+                        content: "Eres Jarvis, un asistente elegante, serio y profesional. Respondes en español de forma clara y breve."
                     },
                     {
                         role: "user",
@@ -34,27 +34,39 @@ async function generarRespuesta(pregunta) {
 
     } catch (error) {
         console.error("Error IA:", error.message);
-        return "Lo siento, no pude procesar su solicitud en este momento.";
+        return "Lo siento, ocurrió un problema al procesar su solicitud.";
     }
 }
 
-// 🔊 Endpoint para Alexa
+// 🔊 Endpoint Alexa
 app.post("/api/alexa/webhook", async (req, res) => {
 
-    let pregunta = "su consulta";
+    const request = req.body.request;
 
-    try {
-        const intent = req.body.request.intent;
+    let pregunta = "";
+
+    // 🟢 Si es intent (cuando preguntas algo)
+    if (request && request.type === "IntentRequest") {
+        const intent = request.intent;
 
         if (intent && intent.slots && intent.slots.query && intent.slots.query.value) {
             pregunta = intent.slots.query.value;
+        } else {
+            pregunta = "saludo";
         }
 
-    } catch (error) {
-        console.log("No se pudo leer la pregunta");
+    } else {
+        // 🔵 Si solo abres la skill
+        pregunta = "saludo";
     }
 
-    const respuestaIA = await generarRespuesta(pregunta);
+    let respuestaIA = "";
+
+    if (pregunta === "saludo") {
+        respuestaIA = "Buenas noches. Soy Jarvis, su asistente personal. ¿En qué puedo ayudarle?";
+    } else {
+        respuestaIA = await generarRespuesta(pregunta);
+    }
 
     const response = {
         version: "1.0",
@@ -63,7 +75,6 @@ app.post("/api/alexa/webhook", async (req, res) => {
                 type: "SSML",
                 ssml: `<speak>
                     <prosody rate="85%" pitch="-5%">
-                        Procesando su solicitud. <break time="400ms"/>
                         ${respuestaIA}
                     </prosody>
                 </speak>`
@@ -75,9 +86,9 @@ app.post("/api/alexa/webhook", async (req, res) => {
     res.json(response);
 });
 
-// 🌐 Ruta de prueba
+// 🌐 Health check
 app.get("/", (req, res) => {
-    res.send("Jarvis inteligente activo");
+    res.send("Jarvis IA activo 🚀");
 });
 
 const PORT = process.env.PORT || 3000;

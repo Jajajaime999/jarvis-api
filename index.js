@@ -50,11 +50,11 @@ app.post("/api/alexa/webhook", async (req, res) => {
             outputSpeech: {
                 type: "SSML",
                 ssml: `<speak>
-                    <prosody rate="90%" pitch="-2%">
-                        Procesando su solicitud. <break time="300ms"/>
-                        ${respuestaIA}
-                    </prosody>
-                </speak>`
+    <prosody rate="90%" pitch="-4%">
+        Procesando su solicitud. <break time="300ms"/>
+        ${respuestaIA}
+    </prosody>
+</speak>`
             },
             shouldEndSession: false
         }

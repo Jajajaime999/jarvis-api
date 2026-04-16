@@ -2,45 +2,24 @@ const express = require("express");
 const app = express();
 
 app.use(express.json());
+const axios = require("axios");
 
-// 🔥 Función que simula inteligencia (puedes conectar API real después)
 async function generarRespuesta(pregunta) {
-    return `He analizado su solicitud. ${pregunta} es un tema interesante. 
-    Permítame explicarlo de forma sencilla.`;
+    const response = await axios.post("https://api.openai.com/v1/chat/completions", {
+        model: "gpt-4o-mini",
+        messages: [
+            { role: "system", content: "Eres Jarvis, un asistente elegante que responde en español de forma clara y formal." },
+            { role: "user", content: pregunta }
+        ]
+    }, {
+        headers: {
+            "Authorization": `Bearer TU_API_KEY`,
+            "Content-Type": "application/json"
+        }
+    });
+
+    return response.data.choices[0].message.content;
 }
-
-app.post("/api/alexa/webhook", async (req, res) => {
-
-    let pregunta = "tu consulta";
-
-    try {
-        const intent = req.body.request.intent;
-        if (intent && intent.slots && intent.slots.query) {
-            pregunta = intent.slots.query.value;
-        }
-    } catch (e) {
-        console.log("Error leyendo la pregunta");
-    }
-
-    const respuestaIA = await generarRespuesta(pregunta);
-
-    const response = {
-        version: "1.0",
-        response: {
-            outputSpeech: {
-                type: "SSML",
-                ssml: `<speak>
-                    <prosody rate="90%" pitch="-2%">
-                        Procesando su solicitud. <break time="300ms"/>
-                        ${respuestaIA}
-                    </prosody>
-                </speak>`
-            },
-            shouldEndSession: false
-        }
-    };
-
-    res.json(response);
 });
 
 // ruta para verificar

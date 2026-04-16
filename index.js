@@ -19,7 +19,6 @@ async function generarRespuesta(pregunta) {
     });
 
     return response.data.choices[0].message.content;
-}
 });
 
 // ruta para verificar
